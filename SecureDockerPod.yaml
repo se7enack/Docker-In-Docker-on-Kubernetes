@@ -1,0 +1,69 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: "docker-sock-secure"
+  namespace: "{POD NAMESPACE}"
+spec:
+  selector:
+    app: "docker-sock-secure"
+  ports:
+    - protocol: TCP
+      port: 2376
+      targetPort: 2376
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations: {}
+  labels:
+    app: "docker-sock-secure"
+  name: "docker-sock-secure"
+  namespace: "{POD NAMESPACE}"
+spec:
+  containers:
+    - name: dind
+      command: [ "/bin/sh", "-c", "--" ]
+      args: [ "mkdir /lib/modules; dockerd --tlsverify --tlscacert=/opt/ca/ca.pem --tlscert=/opt/servcert/server-cert.pem --tlskey=/opt/servkey/server-key.pem --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2376;docker-containerd --config /var/run/docker/containerd/containerd.toml" ] 
+      securityContext:
+        privileged: true
+        runAsGroup: 0
+        runAsUser: 0      
+      image: docker:18.05-dind
+      imagePullPolicy: Always
+      tty: true
+      volumeMounts:
+        - name: dind-storage
+          mountPath: /var/lib/docker
+          readOnly: false
+        - name: ca
+          mountPath: "/opt/ca"
+          readOnly: true      
+        - name: servcert
+          mountPath: "/opt/servcert"
+          readOnly: true
+        - name: servkey
+          mountPath: "/opt/servkey"
+          readOnly: true  
+  imagePullSecrets:
+    - name: registry-creds 
+  nodeSelector:
+    agentpool: buildpool
+  volumes:
+    - name: volume-0
+      hostPath:
+        path: /dev/shm
+    - name: volume-1
+      hostPath:
+        path: /usr/share/zoneinfo/US/Eastern
+    - name: dind-storage
+      persistentVolumeClaim:
+        claimName: docker-pvc
+    - name: ca
+      configMap:
+        name: dind-ca.pem  
+    - name: servcert
+      configMap:
+        name: dind-server-cert.pem  
+    - name: servkey
+      configMap:
+        name: dind-server-key.pem          
