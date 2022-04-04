@@ -1,7 +1,9 @@
 # Docker-in-Docker on Kubernetes
 ## _Run your native docker builds in Kubernetes_
 
-This is a solution for securely running container builds in docker while on Kubernenets
+This is a solution for securely running container builds in docker while on Kubernenets. 
+
+_Works great for Jenkin's workers on Kubernetes to do Docker images builds!_
 
 ## Installation
 
