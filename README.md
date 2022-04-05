@@ -3,7 +3,7 @@
 
 This is a solution for securely running container builds in docker while on Kubernenets. 
 
-_Works great for Jenkin's workers on Kubernetes allowing them to do Docker images builds!_
+_Works great for securely running Jenkins workers in Kubernetes to perform Docker images builds!_
 
 ## Installation
 
